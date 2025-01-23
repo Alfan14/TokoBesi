@@ -1,8 +1,10 @@
-const express = require('express')
-const router = express.Router();
+import express from "express";
+import db from "../db/conn.mjs";
+import { ObjectId } from "mongodb";
+import Product from '../../models/Products.mjs';
 
-// Product model
-const Product = require('../../models/Products');
+
+const router = express.Router();
 
 // @route GET /products
 // @desc Get ALL products
@@ -13,6 +15,16 @@ router.get('/', (req,res)=>{
         res.json(products)
     })
 })
+
+// Get a list of 50 posts
+router.get("/", async (req, res) => {
+    let collection = await db.collection("posts");
+    let results = await collection.find({})
+      .limit(50)
+      .toArray();
+  
+    res.send(results).status(200);
+  });
 
 // @route PUT api/products/:id
 // @desc  Update a product
