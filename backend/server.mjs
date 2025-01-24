@@ -3,14 +3,12 @@ import cors from "cors";
 import multer from 'multer';
 import "./loadEnviroment.mjs";
 import "express-async-errors";
-import productRoute from "./routes/api/productRoute.mjs";
+import products from "./routes/api/products.mjs";
 
 const upload = multer();
 
-const productRoute = require('./routes/api/productRoute.mjs');
-
 // Initialize apps
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT || 5000;
 const app = express()
 
 // Body parser middleware
@@ -23,7 +21,7 @@ app.use(upload.array());
 app.use(cors());
 
 // Use route
-app.use('/api/products', productRoute)
+app.use('/api/products', products)
 
 // Global error handling
 app.use((err, _req, res, next) => {

@@ -1,8 +1,6 @@
 import express from "express";
-import db from "../db/conn.mjs";
+import db from "../../db/conn.mjs";
 import { ObjectId } from "mongodb";
-import Product from '../../models/Products.mjs';
-
 
 const router = express.Router();
 
@@ -25,6 +23,24 @@ router.get("/", async (req, res) => {
   
     res.send(results).status(200);
   });
+// Get a single post
+router.get("/:id", async (req, res) => {
+    let collection = await db.collection("posts");
+    let query = {_id: ObjectId(req.params.id)};
+    let result = await collection.findOne(query);
+  
+    if (!result) res.send("Not found").status(404);
+    else res.send(result).status(200);
+  });
+
+  router.post("/", async (req, res) => {
+    let collection = await db.collection("posts");
+    let newDocument = req.body;
+    newDocument.date = new Date();
+    let result = await collection.insertOne(newDocument);
+    res.send(result).status(204);
+  });
+  
 
 // @route PUT api/products/:id
 // @desc  Update a product
@@ -56,4 +72,4 @@ router.delete('/:id', (req,res)=>{
     })
 })
 
-module.exports = router
+export default router;
