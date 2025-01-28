@@ -1,9 +1,15 @@
 import express from "express";
 import cors from "cors";
 import multer from 'multer';
+import bodyParser from 'body-parser';
 import "./loadEnviroment.mjs";
 import "express-async-errors";
 import products from "./routes/api/products.mjs";
+import authRoutes from "./routes/api/authRoute.mjs";
+import rbacMiddleware from './middleware/rbacMiddleware.mjs';
+
+
+const router = express.Router();
 
 const upload = multer();
 
@@ -21,7 +27,8 @@ app.use(upload.array());
 app.use(cors());
 
 // Use route
-app.use('/api/products', products)
+app.use('/auth', authRoutes); 
+app.use('/api/products',rbacMiddleware.checkRole('user'), products)
 
 // Global error handling
 app.use((err, _req, res, next) => {

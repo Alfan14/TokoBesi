@@ -1,75 +1,100 @@
 import express from "express";
-import db from "../../db/conn.mjs";
+import { getDatabase } from "../../db/conn.mjs";
 import { ObjectId } from "mongodb";
+import Product from '../../models/Products.mjs';
+import authenticateJWT from '../../middleware/authenticationJWT.mjs';
+import rbacMiddleware from '../../middleware/rbacMiddleware.mjs';
 
 const router = express.Router();
 
 // @route GET /products
 // @desc Get ALL products
-router.get('/', (req,res)=>{
-    // Fetch all products from database
-    Product.find({}, (error, products)=>{
-        if (error) console.log(error)
-        res.json(products)
-    })
-})
-
-// Get a list of 50 posts
-router.get("/", async (req, res) => {
-    let collection = await db.collection("posts");
-    let results = await collection.find({})
-      .limit(50)
-      .toArray();
-  
-    res.send(results).status(200);
+router.get('/', authenticateJWT ,  rbacMiddleware.checkPermission('read_record'), async (req, res, next) => {
+      // Fetch all products from the database
+      const db = await getDatabase();
+      let collection = await db.collection("posts");
+      let results = await collection.find({})
+        .limit(50)
+        .toArray();
+    
+      res.send(results).status(200);
   });
+
 // Get a single post
-router.get("/:id", async (req, res) => {
-    let collection = await db.collection("posts");
-    let query = {_id: ObjectId(req.params.id)};
-    let result = await collection.findOne(query);
-  
-    if (!result) res.send("Not found").status(404);
-    else res.send(result).status(200);
+router.get("/:id",authenticateJWT , async (req, res) => {
+  try {
+    const db = await getDatabase();
+    const collection = db.collection("posts");
+    const query = { _id: new ObjectId(req.params.id) };
+    const result = await collection.findOne(query);
+
+    if (!result) {
+        res.status(404).send("Post not found");
+    } else {
+        res.status(200).send(result);
+    }
+    } catch (error) {
+        res.status(400).send("Invalid ID format");
+    }
   });
 
-  router.post("/", async (req, res) => {
-    let collection = await db.collection("posts");
-    let newDocument = req.body;
-    newDocument.date = new Date();
-    let result = await collection.insertOne(newDocument);
-    res.send(result).status(204);
-  });
-  
+  // Adding new Products
+  router.post("/",authenticateJWT , async (req, res) => {
+    try {
+        const db = await getDatabase();
+        const collection = db.collection("posts");
+        let newProduct = req.body;
+        newProduct.date = new Date();
+
+        let result = await collection.insertOne(newProduct);
+
+        // Respond with the inserted product
+        res.status(201).send(result);
+    } catch (err) {
+        console.error("POST route error:", err);
+        res.status(500).send("Uh oh! An unexpected error occurred.");
+    }
+});
 
 // @route PUT api/products/:id
 // @desc  Update a product
-router.put('/:id', (req,res)=>{
-    // Update a product in the database
-    Product.updateOne({_id:req.params.id},{
-        name: req.body.name,
-        description: req.body.description,
-        price: req.body.price,
-        quantity: req.body.quantity,
-        photo:req.body.photo
-    }, {upsert: true}, (err)=>{
-        if(err) console.log(err);
-        res.json({success:true})
-    })
-})
+router.patch("/:id",authenticateJWT , async (req, res) => {
+  try {
+    const db = await getDatabase();
+    const collection = db.collection("posts");
+
+    const query = { _id: new ObjectId(req.params.id) };
+    const updates = { $set: req.body }; // Use $set for general updates
+    const result = await collection.updateOne(query, updates);
+
+    if (result.matchedCount === 0) {
+        res.status(404).send("Post not found");
+    } else {
+        res.status(200).send(result);
+    }
+    } catch (error) {
+        res.status(400).send("Invalid ID format");
+    }
+});
 
 // @route DELETE api/products/:id
 // @desc  Delete a product
-router.delete('/:id', (req,res)=>{
-    // Delete a product from database
-    Product.deleteOne({_id: req.params.id}, (err)=>{
-        if (err){
-            console.log(err)
-            res.json({success:false})
-        }else{
-            res.json({success:true})
+router.delete("/:id",authenticateJWT , async (req, res) => {
+  try {
+        const db = await getDatabase();
+        const collection = db.collection("posts");
+
+        const query = { _id: new ObjectId(req.params.id) };
+        const result = await collection.deleteOne(query);
+
+        if (result.deletedCount === 0) {
+            res.status(404).send("Post not found");
+        } else {
+            res.status(200).send(result);
         }
-    })
-})
+    } catch (error) {
+        res.status(400).send("Invalid ID format");
+    }
+});
 
 export default router;
