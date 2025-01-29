@@ -6,7 +6,7 @@ import "./loadEnviroment.mjs";
 import "express-async-errors";
 import products from "./routes/api/products.mjs";
 import authRoutes from "./routes/api/authRoute.mjs";
-import rbacMiddleware from './middleware/rbacMiddleware.mjs';
+import checkRole from './middleware/rbacMiddleware.mjs';
 
 
 const router = express.Router();
@@ -28,10 +28,11 @@ app.use(cors());
 
 // Use route
 app.use('/auth', authRoutes); 
-app.use('/api/products',rbacMiddleware.checkRole('user'), products)
+app.use('/api/products', products)
 
 // Global error handling
 app.use((err, _req, res, next) => {
+  console.error("Unhandled error:", err);
   res.status(500).send("Uh oh! An unexpected error occured.")
 })
 

@@ -6,6 +6,7 @@ const authenticateJWT = (req, res, next) => {
     if (token) {
       jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) {
+          console.log("Jwt",err)
           return res.sendStatus(403);
         }
         req.user = user;

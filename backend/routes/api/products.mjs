@@ -9,7 +9,7 @@ const router = express.Router();
 
 // @route GET /products
 // @desc Get ALL products
-router.get('/', authenticateJWT ,  rbacMiddleware.checkPermission('read_record'), async (req, res, next) => {
+router.get('/', authenticateJWT ,  async (req, res, next) => await rbacMiddleware.checkPermission('read_record')(req, res, next) , async (req, res, next) => {
       // Fetch all products from the database
       const db = await getDatabase();
       let collection = await db.collection("posts");
@@ -21,7 +21,7 @@ router.get('/', authenticateJWT ,  rbacMiddleware.checkPermission('read_record')
   });
 
 // Get a single post
-router.get("/:id",authenticateJWT , async (req, res) => {
+router.get("/:id",authenticateJWT , async (req, res, next) => await rbacMiddleware.checkPermission('read_record')(req, res, next) , async (req, res) => {
   try {
     const db = await getDatabase();
     const collection = db.collection("posts");
@@ -39,7 +39,8 @@ router.get("/:id",authenticateJWT , async (req, res) => {
   });
 
   // Adding new Products
-  router.post("/",authenticateJWT , async (req, res) => {
+  router.post("/",authenticateJWT , async (req, res, next) => await rbacMiddleware.checkPermission('create_record')(req, res, next) ,
+  async (req, res) => {
     try {
         const db = await getDatabase();
         const collection = db.collection("posts");
@@ -48,7 +49,6 @@ router.get("/:id",authenticateJWT , async (req, res) => {
 
         let result = await collection.insertOne(newProduct);
 
-        // Respond with the inserted product
         res.status(201).send(result);
     } catch (err) {
         console.error("POST route error:", err);
@@ -58,7 +58,8 @@ router.get("/:id",authenticateJWT , async (req, res) => {
 
 // @route PUT api/products/:id
 // @desc  Update a product
-router.patch("/:id",authenticateJWT , async (req, res) => {
+router.patch("/:id",authenticateJWT , async (req, res, next) => await rbacMiddleware.checkPermission('update_record')(req, res, next) , 
+async (req, res) => {
   try {
     const db = await getDatabase();
     const collection = db.collection("posts");
@@ -79,7 +80,7 @@ router.patch("/:id",authenticateJWT , async (req, res) => {
 
 // @route DELETE api/products/:id
 // @desc  Delete a product
-router.delete("/:id",authenticateJWT , async (req, res) => {
+router.delete("/:id",authenticateJWT , async (req, res, next) => await rbacMiddleware.checkPermission('delete_record')(req, res, next) , async (req, res) => {
   try {
         const db = await getDatabase();
         const collection = db.collection("posts");

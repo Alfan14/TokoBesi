@@ -16,7 +16,7 @@ router.post('/login', async(req, res) => {
         const db = await getDatabase();
         let collection = await db.collection("users");
 
-        const { username, password } = req.body;
+        const { username, password , role} = req.body;
 
         if (!username || !password) {
             return res.status(400).send('Username and password are required');
@@ -33,7 +33,7 @@ router.post('/login', async(req, res) => {
             return res.status(401).send('Invalid credentials');
         }
 
-        const token = jwt.sign({ id: user._id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id, username: user.username , role :user.role}, SECRET_KEY, { expiresIn: '1h' });
         res.json({ token });
     } catch (err) {
         console.error('Error during signin:', err);

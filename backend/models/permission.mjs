@@ -1,11 +1,17 @@
+import roles from "../config/roles.json" with { type: "json" };
+
 class Permissions {
     constructor() {
-      this.permissions = [];
+      this.roles = roles.roles;
     }
   
   getPermissionsByRoleName(roleName) {
       const role = roles.roles.find((r) => r.name === roleName);
-      return role ? role.permissions : [];
+      if (!role) {
+        console.error(`[RBAC] Role '${roleName}' not found in roles.json`);
+        return [];
+      }
+      return role.permissions;
     }
   }
 
