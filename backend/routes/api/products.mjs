@@ -1,16 +1,21 @@
 import express from "express";
 import { getDatabase } from "../../db/conn.mjs";
 import { ObjectId } from "mongodb";
-import Product from '../../models/Products.mjs';
 import authenticateJWT from '../../middleware/authenticationJWT.mjs';
 import rbacMiddleware from '../../middleware/rbacMiddleware.mjs';
 
 const router = express.Router();
 
 // @route GET /products
-// @desc Get ALL products
+// @desc Get ALL products 
 router.get('/', authenticateJWT ,  async (req, res, next) => await rbacMiddleware.checkPermission('read_record')(req, res, next) , async (req, res, next) => {
       // Fetch all products from the database
+      const allowedRoles = ['admin','manager', 'employee'];  
+
+      if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'Access denied' }); 
+      }
+
       const db = await getDatabase();
       let collection = await db.collection("posts");
       let results = await collection.find({})
@@ -23,6 +28,12 @@ router.get('/', authenticateJWT ,  async (req, res, next) => await rbacMiddlewar
 // Get a single post
 router.get("/:id",authenticateJWT , async (req, res, next) => await rbacMiddleware.checkPermission('read_record')(req, res, next) , async (req, res) => {
   try {
+    const allowedRoles = ['admin','manager', 'employee'];  
+
+      if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'Access denied' }); 
+    }
+
     const db = await getDatabase();
     const collection = db.collection("posts");
     const query = { _id: new ObjectId(req.params.id) };
@@ -42,6 +53,11 @@ router.get("/:id",authenticateJWT , async (req, res, next) => await rbacMiddlewa
   router.post("/",authenticateJWT , async (req, res, next) => await rbacMiddleware.checkPermission('create_record')(req, res, next) ,
   async (req, res) => {
     try {
+        const allowedRoles = ['admin'];  
+
+        if (!allowedRoles.includes(req.user.role)) {
+              return res.status(403).json({ error: 'Access denied , Only Admin can Post it' }); 
+        }
         const db = await getDatabase();
         const collection = db.collection("posts");
         let newProduct = req.body;
@@ -61,6 +77,11 @@ router.get("/:id",authenticateJWT , async (req, res, next) => await rbacMiddlewa
 router.patch("/:id",authenticateJWT , async (req, res, next) => await rbacMiddleware.checkPermission('update_record')(req, res, next) , 
 async (req, res) => {
   try {
+    const allowedRoles = ['admin','manager'];  
+
+      if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'Access denied , Only Admin and Manager can Update it' }); 
+      }
     const db = await getDatabase();
     const collection = db.collection("posts");
 
@@ -82,6 +103,11 @@ async (req, res) => {
 // @desc  Delete a product
 router.delete("/:id",authenticateJWT , async (req, res, next) => await rbacMiddleware.checkPermission('delete_record')(req, res, next) , async (req, res) => {
   try {
+        const allowedRoles = ['admin'];  
+
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ error: 'Access denied , Only Admin can Delete it' }); 
+        }
         const db = await getDatabase();
         const collection = db.collection("posts");
 
