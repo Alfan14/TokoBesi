@@ -3,12 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
+    "@syncfusion/ej2": "^28.2.3",
+    "@syncfusion/ej2-react-buttons": "^28.2.3",
+    "@syncfusion/ej2-react-diagrams": "^28.2.3",
+    "@syncfusion/ej2-react-inputs": "^28.2.3",
+    "@syncfusion/ej2-react-notifications": "^28.2.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.7.9",
+    "buffer": "^6.0.3",
+    "path": "^0.12.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-refresh": "^0.16.0",
+    "react-router-dom": "^5.3.4",
     "react-scripts": "5.0.1",
+    "url": "^0.11.4",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -34,5 +46,22 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "ajv": "^7.2.4",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^9.2.1",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "react-refresh-webpack-plugin": "^0.1.0",
+    "source-map-loader": "^5.0.0",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
+  },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
   }
 }

@@ -16,13 +16,13 @@ router.post('/login', async(req, res) => {
         const db = await getDatabase();
         let collection = await db.collection("users");
 
-        const { username, password , role} = req.body;
+        const { email, password , role} = req.body;
 
-        if (!username || !password) {
-            return res.status(400).send('Username and password are required');
+        if (!email|| !password) {
+            return res.status(400).send('Email and password are required');
         }
 
-        const user = await collection.findOne({ username });
+        const user = await collection.findOne({ email });
         if (!user) {
             return res.status(401).send('Invalid credentials');
         }
@@ -33,7 +33,7 @@ router.post('/login', async(req, res) => {
             return res.status(401).send('Invalid credentials');
         }
 
-        const token = jwt.sign({ id: user._id, username: user.username , role :user.role}, SECRET_KEY, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id, email: user.email , role :user.role}, SECRET_KEY, { expiresIn: '1h' });
         res.json({ token });
     } catch (err) {
         console.error('Error during signin:', err);
@@ -47,21 +47,21 @@ router.post('/signup', async(req, res) => {
         const db = await getDatabase();
         let collection = await db.collection("users");
 
-        const { username, password , role } = req.body;
+        const { email, password , role } = req.body;
         const hashedPassword = bcrypt.hashSync(password, 8);
 
-        const newUser = { id: collection.length + 1, username, password: hashedPassword , role };
+        const newUser = { id: collection.length + 1, email, password: hashedPassword , role };
 
-        const existingUser = await collection.findOne({ username });
+        const existingUser = await collection.findOne({ email });
 
         if (existingUser) {
-            return res.status(400).send('Username already exists');
+            return res.status(400).send('Email already exists');
         }
 
         const result = await collection.insertOne(newUser);
 
         if (result.insertedId) {
-            const token = jwt.sign({ id: result.insertedId, username: newUser.username }, SECRET_KEY, { expiresIn: '1h' });
+            const token = jwt.sign({ id: result.insertedId, email: newUser.email }, SECRET_KEY, { expiresIn: '1h' });
             res.json({ token });
         }
         else {
