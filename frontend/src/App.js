@@ -1,21 +1,20 @@
-import Login from "./pages/login";
-import Signup from "./pages/signup";
-import PrivateRoutes from "./routes/private";
-import PublicRoutes from "./routes/public";
 import './App.css';
-import Header from './components/Header/Header';
-import LoginForm from './components/LoginForm/LoginForm';
-import RegistrationForm from './components/RegistrationForm/RegistrationForm';
-import Home from './components/Home/Home';
-import AlertComponent from "./components/AlertComponent/AlertComponent";
+import Header from './screen/Header/Header';
+import Shop from './pages/shop/myShop';
+import LoginForm from './screen/LoginForm/LoginForm';
+import RegistrationForm from './screen/RegistrationForm/RegistrationForm';
+import Home from './pages/Home/myHome';
+import AlertComponent from "./screen/AlertComponent/AlertComponent";
 import PrivateRoute from './utils/PrivateRoute';
 import React, { useState, useEffect } from 'react';
 import { setAuthToken } from "./utils/auth.utils";
 import {
   BrowserRouter as Router,
+  Routes,
   Switch,
   Route
 } from "react-router-dom";
+import ProductScreen from './screen/Product/ProductScreen';
 
 function App() {
   const [title, updateTitle] = useState(null);
@@ -27,30 +26,23 @@ function App() {
   return (
     <Router>
     <div className="App">
-      <Header title={title}/>
-        <div className="container d-flex align-items-center flex-column">
-          <Switch>
-            <Route path="/" exact={true}>
-              <RegistrationForm showError={updateErrorMessage} updateTitle={updateTitle}/>
-            </Route>
-            <Route path="/register">
-              <RegistrationForm showError={updateErrorMessage} updateTitle={updateTitle}/>
-            </Route>
-            <Route path="/login">
-              <LoginForm showError={updateErrorMessage} updateTitle={updateTitle}/>
-            </Route>
-            <PrivateRoute path="/home">
-              <Home/>
-            </PrivateRoute>
-            {/* <Route path="/home">
-              <Home/>
-            </Route> */}
-          </Switch>
-          <AlertComponent errorMessage={errorMessage} hideError={updateErrorMessage}/>
-        </div>
+      <Header title={title} />
+      <div className="container d-flex align-items-center flex-column">
+        <Routes>
+          <Route path="/" component={<RegistrationForm showError={updateErrorMessage} updateTitle={updateTitle} />} />
+          <Route path="/shop" element={<Shop showError={updateErrorMessage} updateTitle={updateTitle} />} />
+          <Route path="/product/:id" element={<ProductScreen />} />
+          <Route path="/register" element={<RegistrationForm showError={updateErrorMessage} updateTitle={updateTitle} />} />
+          <Route path="/login" element={<LoginForm showError={updateErrorMessage} updateTitle={updateTitle} />} />
+                <Route element={<PrivateRoute />}>
+                    <Route path="/home" element={<Home/>}/>
+                </Route>
+        </Routes>
+        <AlertComponent errorMessage={errorMessage} hideError={updateErrorMessage} />
+      </div>
     </div>
-    </Router>
-  );
+  </Router>
+);
 }
 
 export default App;
