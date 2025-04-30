@@ -7,7 +7,9 @@ import "express-async-errors";
 import products from "./routes/api/products.mjs";
 import authRoutes from "./routes/api/authRoute.mjs";
 import checkRole from './middleware/rbacMiddleware.mjs';
+import dotenv from 'dotenv';
 
+dotenv.config();
 
 const router = express.Router();
 

@@ -1,28 +1,38 @@
 import express from "express";
+import cors from 'cors';
 import { getDatabase } from "../../db/conn.mjs";
 import { ObjectId } from "mongodb";
 import jwt        from 'jsonwebtoken';
 import bcrypt     from 'bcryptjs';
-import authenticateJWT from '../../middleware/authenticationJWT.mjs'
+import authenticateJWT from '../../middleware/authenticationJWT.mjs';
+import dotenv from 'dotenv'
 
 const router = express.Router();
+router.use(express.json());
+router.use(cors());
 
 // Secret Key
-const SECRET_KEY = process.env.SECRET_KEY;
+const SECRET_KEY = process.env.SECRET_KEY ;
 
 // Login Page
-router.post('/login', async(req, res) => {
+router.post('/login', async (req, res) => {
     try {
         const db = await getDatabase();
         let collection = await db.collection("users");
 
-        const { email, password , role} = req.body;
+        const { email, password } = req.body;  
 
-        if (!email|| !password) {
+        if (!SECRET_KEY) {
+            console.error(" SECRET_KEY is undefined! Make sure .env is loaded.");
+            return res.status(500).send("Server error: Missing SECRET_KEY");
+        }
+
+        if (!email || !password) {
             return res.status(400).send('Email and password are required');
         }
 
         const user = await collection.findOne({ email });
+
         if (!user) {
             return res.status(401).send('Invalid credentials');
         }
@@ -33,13 +43,19 @@ router.post('/login', async(req, res) => {
             return res.status(401).send('Invalid credentials');
         }
 
-        const token = jwt.sign({ id: user._id, email: user.email , role :user.role}, SECRET_KEY, { expiresIn: '1h' });
+        console.log("SIGNING SECRET:", process.env.SECRET_KEY); 
+
+        const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, SECRET_KEY, { algorithm: "HS256", expiresIn: '1h' });
+
+        console.log("Generated Token:", token);
+
         res.json({ token });
+        console.log("Received data:", req.body);
     } catch (err) {
         console.error('Error during signin:', err);
         res.status(500).send('Error while processing the request');
     }
-  });
+});
 
 // Sign Up
 router.post('/signup', async(req, res) => {
@@ -74,29 +90,30 @@ router.post('/signup', async(req, res) => {
 
 });
 // Getting users
-router.get('/me', authenticateJWT ,async(req, res) => {
+router.get("/me", authenticateJWT, async (req, res) => {
     try {
-        const db = await getDatabase();
-        let collection = await db.collection("users");
+        console.log(" Decoded User:", req.user); 
 
-        const userId = req.user?.id; 
+        const db = await getDatabase();
+        const collection = db.collection("users");
+
+        const userId = req.user?.id;
         if (!userId) {
-            return res.status(40).send('Unauthorized');
+            return res.status(401).send("Unauthorized"); 
         }
 
         const user = await collection.findOne({ _id: new ObjectId(userId) });
         if (!user) {
-            return res.status(404).send('User not found');
+            return res.status(404).send("User not found");
         }
 
         const { password, ...userWithoutPassword } = user;
         res.json(userWithoutPassword);
 
     } catch (err) {
-        console.error('Error during signin:', err);
-        res.status(500).send('Error while processing the request');
+        console.error(" Error during /auth/me:", err);
+        res.status(500).send("Error while processing the request");
     }
-  });
-
-
+});
+  
 export default router;

@@ -25,6 +25,35 @@ router.get('/', authenticateJWT ,  async (req, res, next) => await rbacMiddlewar
       res.send(results).status(200);
   });
 
+// Get products number
+router.get("/search", authenticateJWT , async ( req , res , next ) =>  await rbacMiddleware.checkPermission('read_record')(req, res, next) , async (req, res) => {
+    try {
+    const allowedRoles = ['admin','manager', 'employee'];  
+
+    if (!allowedRoles.includes(req.user.role)) {
+          return res.status(403).json({ error: 'Access denied' }); 
+      }
+    const db = await getDatabase();
+    let collection = await db.collection("posts");
+    const name = req.query.name;
+
+    if (!name) {
+        return res.status(400).json({ error: "Missing 'name' query parameter" });
+      }
+
+      const result = await collection.findOne({ name: { $regex: new RegExp(name, "i") } });
+
+      if (!result) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+
+      return res.status(200).json(result);
+
+    } catch (error) {
+      console.error("Search Error:", error);
+      return res.status(500).json({ error: "Server error during search" });
+    }
+});
 // Get a single post
 router.get("/:id",authenticateJWT , async (req, res, next) => await rbacMiddleware.checkPermission('read_record')(req, res, next) , async (req, res) => {
   try {

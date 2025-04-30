@@ -1,24 +1,14 @@
 import React from 'react';
-import { Redirect, Route } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { ACCESS_TOKEN_NAME } from '../constants/apiConstants';
+import { AuthService } from "../services/AuthService";
+
+
 function PrivateRoute({ children, ...rest }) {
-    return (
-      <Route
-        {...rest}
-        render={({ location }) =>
-          localStorage.getItem(ACCESS_TOKEN_NAME) ? (
-            children
-          ) : (
-            <Redirect
-              to={{
-                pathname: "/login",
-                state: { from: location }
-              }}
-            />
-          )
-        }
-      />
-    );
+  const token = AuthService.getAccessToken();
+  const isAuthenticated = token && !AuthService.isTokenExpired(token);
+
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
   }
 
 export default PrivateRoute;
