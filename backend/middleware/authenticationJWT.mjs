@@ -3,7 +3,7 @@ const SECRET_KEY = process.env.SECRET_KEY ;
 
 const authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  console.log("🔹 Received Auth Header:", authHeader);
+  console.log("Received Auth Header:", authHeader);
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(403).json({ message: "Forbidden: No token provided" });

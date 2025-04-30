@@ -3,25 +3,25 @@
       {
         "name": "admin",
         "permissions": [
-          "create_record",
-          "read_record",
-          "update_record",
-          "delete_record"
+          "create_user",
+          "read_user",
+          "update_user",
+          "delete_user"
         ]
       },
       {
-        "name": "manager",
+        "name": "konselor",
         "permissions": [
-          "create_record",
-          "read_record",
-          "update_record"
-        ]
+          "create_consultation",
+          "read_consulation",
+          "update_consultation",
+          "delete_consulation"
+         ]
       },
       {
-        "name": "employee",
+        "name": "pelajar",
         "permissions": [
-          "create_record",
-          "read_record"
+          "create_booking"
         ]
       }
     ]
