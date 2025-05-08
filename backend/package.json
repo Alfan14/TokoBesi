@@ -5,9 +5,8 @@
   "main": "server.mjs",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --experimental-modules server.mjs",
     "start": "node server.mjs",
+    "dev": "nodemon --experimental-modules server.mjs",
     "json:server": "json-server --watch ./graphql/schema/db.json  --port 8000"
   },
   "author": "Alfan",
